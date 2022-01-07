@@ -30,7 +30,7 @@
   "author": "Peter Bengtsson",
   "license": "MIT",
   "dependencies": {
-    "css-select": "^4.2.0",
+    "css-select": "^4.2.1",
     "css-tree": "2.0.4",
     "csso": "5.0.2",
     "htmlparser2": "^7.2.0"
