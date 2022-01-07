@@ -28,6 +28,8 @@ jobs:
             unzip -d "$name" "$name.zip"
           done
 
+          # cp artifacts/junit.xml/junit.xml
+
       - name: Debug built files
         run: |
           ls -ltra
