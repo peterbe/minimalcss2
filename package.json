@@ -40,6 +40,15 @@
     "testEnvironment": "node",
     "testMatch": [
       "<rootDir>/test/*.ts"
+    ],
+    "reporters": [
+      "default",
+      [
+        "jest-junit",
+        {
+          "suiteName": "jest tests"
+        }
+      ]
     ]
   },
   "devDependencies": {
@@ -52,6 +61,7 @@
     "eslint": "8.5.0",
     "eslint-config-prettier": "8.3.0",
     "jest": "27.4.5",
+    "jest-junit": "13.0.0",
     "prettier": "2.5.1",
     "ts-jest": "27.1.2",
     "typescript": "4.5.4"
