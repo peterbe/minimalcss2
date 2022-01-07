@@ -24,7 +24,7 @@ export function postProcessOptimize(ast: CssNode) {
   const activeAnimationNames = new Set();
   csstree.walk(ast, {
     visit: "Declaration",
-    enter: function (declaration) {
+    enter(declaration) {
       if (this.rule) {
         if (csstree.property(declaration.property).basename === "animation") {
           activeAnimationNames.add(
@@ -45,7 +45,7 @@ export function postProcessOptimize(ast: CssNode) {
   csstree.walk(ast, {
     visit: "Atrule",
     enter: (node, item, list) => {
-      const basename = csstree.keyword(node.name).basename;
+      const { basename } = csstree.keyword(node.name);
       if (node.prelude) {
         if (basename === "keyframes") {
           if (!activeAnimationNames.has(csstree.generate(node.prelude))) {
@@ -64,7 +64,7 @@ export function postProcessOptimize(ast: CssNode) {
   const activeFontFamilyNames = new Set();
   csstree.walk(ast, {
     visit: "Declaration",
-    enter: function (declaration) {
+    enter(declaration) {
       if (this.rule) {
         if (csstree.property(declaration.property).name === "font-family") {
           csstree

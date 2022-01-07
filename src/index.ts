@@ -11,17 +11,17 @@ export type { Options, Result };
 export function minimize(options: Options): Result {
   const doc = parseDocument(options.html);
 
-  // parse CSS to AST
+  // Parse CSS to AST
   const ast = csstree.parse(options.css);
 
   // To avoid costly lookup for a selector string that appears more
   // than once.
   const cache = new Map<string, boolean>();
 
-  // traverse AST and modify it
+  // Traverse AST and modify it
   csstree.walk(ast, {
     visit: "Rule",
-    enter: function (node, item, list) {
+    enter(node, item, list) {
       // console.log({
       //   TYPE: node.type,
       //   CSS: csstree.generate(node),
@@ -45,9 +45,12 @@ export function minimize(options: Options): Result {
       }
 
       if (node.prelude.type === "SelectorList") {
-        // XXX Figure out how to use `node.prelude.children.isEmpty()`
-        // instead of this boolean.
-        let anyLeft = false;
+        // console.log(
+        //   typeof node.prelude.children,
+        //   Object.keys(node.prelude.children),
+        //   node.prelude.children.isEmpty()
+        // );
+
         node.prelude.children.forEach((node, item, list) => {
           const selectorString = csstree.generate(node);
 
@@ -56,20 +59,20 @@ export function minimize(options: Options): Result {
           if (cache.has(selectorString)) {
             if (cache.get(selectorString)) {
               list.remove(item);
-            } else {
-              anyLeft = true;
             }
           } else {
             if (!present(doc, selectorString)) {
               cache.set(selectorString, false);
               list.remove(item);
-            } else {
-              anyLeft = true;
             }
           }
         });
 
-        if (!anyLeft) {
+        // `node.prelude.children.isEmpty` is a getter, not a method.
+        // Pretty sure it's a bug in
+        // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/css-tree/index.d.ts
+        // @ts-expect-error But in DefinitelyTyped for css-tree
+        if (node.prelude.children.isEmpty as boolean) {
           list.remove(item);
         }
       }
