@@ -57,13 +57,15 @@ export function minimize(options: Options): Result {
           // If we have come across this selector string before, rely on the
           // cache Map exclusively.
           if (cache.has(selectorString)) {
-            if (cache.get(selectorString)) {
+            if (!cache.get(selectorString)) {
               list.remove(item);
             }
           } else {
             if (!present(doc, selectorString)) {
               cache.set(selectorString, false);
               list.remove(item);
+            } else {
+              cache.set(selectorString, true);
             }
           }
         });
