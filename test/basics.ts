@@ -20,6 +20,20 @@ describe("Basics", () => {
     expect(typeof finalCSS).toBe("string");
   });
 
+  it("should be able to benefit from caching", () => {
+    const html = `
+    <html>
+      <h1>Header</h1>
+    </html>
+    `;
+    const css = `
+    h1, h2, h3 { color: blue }
+    h2 { color: orange }
+    `;
+    const { finalCSS } = minimize({ html, css });
+    expect(typeof finalCSS).toBe("string");
+  });
+
   it("should reduce the selectors", () => {
     const html = `
     <!doctype html>
@@ -199,7 +213,7 @@ describe("Basics", () => {
     `;
     const css = `
     @font-face {
-      font-family: 'Lato';
+      font-family: "Lato";
       font-style: normal;
       font-weight: 400;
       src: local('Lato Regular'), local('Lato-Regular'), url(https://fonts.gstatic.com/s/lato/v14/MDadn8DQ_3oT6kvnUq_2r_esZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
@@ -207,7 +221,7 @@ describe("Basics", () => {
     }
 
     div.foo {
-      font-family: 'Lato', Helvetica;
+      font-family: Lato, Helvetica;
     }
     `;
     const finalCSS = getFinalCSS({
