@@ -1,9 +1,9 @@
 name: Node.js CI
 
 on:
-  #   push:
-  #     branches-ignore:
-  #       - "dependabot/**"
+  push:
+    branches-ignore:
+      - "dependabot/**"
   pull_request:
 
 env:
@@ -57,6 +57,6 @@ jobs:
         if: always() && matrix.node == env.NODE_COV
         uses: actions/upload-artifact@v2
         with:
-          name: Unit Test Results
+          name: coverage
           path: |
             coverage
