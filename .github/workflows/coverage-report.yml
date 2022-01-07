@@ -28,6 +28,11 @@ jobs:
             unzip -d "$name" "$name.zip"
           done
 
+      - name: Debug built files
+        run: |
+          ls -ltra
+          ls -ltra artifacts/
+
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
