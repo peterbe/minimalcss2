@@ -52,3 +52,11 @@ jobs:
       - name: Run Jest with coverage
         run: npm run test:jest -- --coverage
         if: matrix.node == env.NODE_COV
+
+      - name: Upload Test coverage
+        if: always() && matrix.node == env.NODE_COV
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit Test Results
+          path: |
+            coverage
