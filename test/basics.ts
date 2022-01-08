@@ -16,8 +16,10 @@ describe("Basics", () => {
     h1, h2, h3 { color: blue }
     ol, li { color: blue }
     `;
-    const { finalCSS } = minimize({ html, css });
+    const { finalCSS, sizeBefore, sizeAfter } = minimize({ html, css });
     expect(typeof finalCSS).toBe("string");
+    expect(typeof sizeBefore).toBe("number");
+    expect(typeof sizeAfter).toBe("number");
   });
 
   it("should be able to benefit from caching", () => {
@@ -355,5 +357,52 @@ describe("Basics", () => {
     ).toBeTruthy();
     expect(finalCSS.includes("@keyframes slidein")).toBeTruthy();
     expect(finalCSS.includes("@keyframes RotateSlot")).toBeFalsy();
+  });
+});
+
+describe("Weirdos", () => {
+  it("should cope with :before and ::after", () => {
+    const html = `
+    <html>
+      <h1>Header</h1>
+    </html>
+    `;
+    // See https://developer.mozilla.org/en-US/docs/Web/CSS/::before
+    // See https://developer.mozilla.org/en-US/docs/Web/CSS/::after
+    const css = `
+    a::after { content: "→" }
+    h1:after { text-decoration: underline }
+
+    a::before, h1:before { content: "♥"; }
+    `;
+    const finalCSS = getFinalCSS({ html, css });
+    expect(
+      finalCSS.includes("h1:after{text-decoration:underline}")
+    ).toBeTruthy();
+    expect(finalCSS.includes('h1:before{content:"♥"}')).toBeTruthy();
+    expect(finalCSS.includes("a:")).toBeFalsy();
+  });
+
+  it("should always keep the * selector", () => {
+    const html = `
+    <html>
+      <h1>Header</h1>
+    </html>
+    `;
+    const css = `
+    *,
+    :after,
+    :before {
+      box-sizing: inherit;
+    }
+    html, body {
+      box-sizing: border-box;
+    }
+    `;
+    const finalCSS = getFinalCSS({ html, css });
+    expect(
+      finalCSS.includes("*,:after,:before{box-sizing:inherit}")
+    ).toBeTruthy();
+    expect(finalCSS.includes("html{box-sizing:border-box}")).toBeTruthy();
   });
 });

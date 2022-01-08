@@ -52,7 +52,8 @@ export function minimize(options: Options): Result {
         // );
 
         node.prelude.children.forEach((node, item, list) => {
-          const selectorString = csstree.generate(node);
+          const selectorStringRaw = csstree.generate(node);
+          const selectorString = reduceCSSSelector(selectorStringRaw);
 
           // If we have come across this selector string before, rely on the
           // cache Map exclusively.
@@ -61,11 +62,11 @@ export function minimize(options: Options): Result {
               list.remove(item);
             }
           } else {
-            if (!present(doc, selectorString)) {
+            if (selectorString === "" || present(doc, selectorString)) {
+              cache.set(selectorString, true);
+            } else {
               cache.set(selectorString, false);
               list.remove(item);
-            } else {
-              cache.set(selectorString, true);
             }
           }
         });
@@ -105,5 +106,27 @@ export function minimize(options: Options): Result {
 }
 
 function present(doc: Document, selector: string) {
-  return selectOne(selector, doc) !== null;
+  // if (selector === "") return true;
+  try {
+    return selectOne(selector, doc) !== null;
+  } catch (err) {
+    console.log("Error caused on:", { selector });
+
+    throw err;
+  }
+}
+
+/**
+ * Reduce a CSS selector to be without any pseudo class parts.
+ * For example, from `a:hover` return `a`. And from `input::-moz-focus-inner`
+ * to `input`.
+ * Also, more advanced ones like `a[href^="javascript:"]:after` to
+ * `a[href^="javascript:"]`.
+ * The last example works too if the input was `a[href^='javascript:']:after`
+ * instead (using ' instead of ").
+ */
+function reduceCSSSelector(selector: string): string {
+  return selector.split(
+    /:(?=([^"'\\]*(\\.|["']([^"'\\]*\\.)*[^"'\\]*['"]))*[^"']*$)/g
+  )[0];
 }
