@@ -1,8 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-// const each = require("jest-each").default;
-
 import { minimize } from "../src";
 
 describe("End-to-ends", () => {
