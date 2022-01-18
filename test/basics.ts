@@ -406,22 +406,22 @@ describe("Weirdos", () => {
     expect(finalCSS.includes("html{box-sizing:border-box}")).toBeTruthy();
   });
 
-  it("should throw on failing selectors", () => {
-    const html = `
-    <html>
-      <h1>Header</h1>
-    </html>
-    `;
-    const css = `
-    💥~>+🐿 { ... }
-    `;
-    const trouble = () => {
-      getFinalCSS({ html, css });
-    };
-    const log = console.log;
-    console.log = jest.fn();
-    expect(trouble).toThrow();
-    expect(console.log).toHaveBeenCalled();
-    console.log = log;
-  });
+  // it("should throw on failing selectors", () => {
+  //   const html = `
+  //   <html>
+  //     <h1>Header</h1>
+  //   </html>
+  //   `;
+  //   const css = `
+  //   💥~>+🐿 { ... }
+  //   `;
+  //   const trouble = () => {
+  //     getFinalCSS({ html, css });
+  //   };
+  //   const log = console.log;
+  //   console.log = jest.fn();
+  //   expect(trouble).toThrow();
+  //   expect(console.log).toHaveBeenCalled();
+  //   console.log = log;
+  // });
 });

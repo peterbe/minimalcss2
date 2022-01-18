@@ -27,6 +27,9 @@ function main() {
     h1 { border: 1px solid red; }
     div.ingress p { font-weight: bold; }
     div.ingress em { font-weight: normal; }
+
+    div>p { border: 1px solid pink }
+    html body div.ingress p { color: pink }
     `;
 
   //   console.log(minimize({ html, css }));
