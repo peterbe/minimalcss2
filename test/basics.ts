@@ -386,4 +386,36 @@ describe("Basics", () => {
     });
     expect(finalCSS).toBe("div p i{color:pink}");
   });
+
+  it("should delete inputs by type", () => {
+    const html = `
+    <html>
+      <body>
+        <form>
+          <input name="text">
+          <input type="password" name="password">
+        </form>
+      </body>
+    </html>
+    `;
+    const css = `
+    input { color: pink}
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="text"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+    `;
+    const finalCSS = getFinalCSS({
+      html,
+      css,
+    });
+    expect(finalCSS.includes("input{color:pink}")).toBeTruthy();
+    expect(finalCSS.includes("input[type=email]")).toBeFalsy();
+    expect(finalCSS.includes("input[type=password]")).toBeTruthy();
+    expect(finalCSS.includes("input[type=search]")).toBeFalsy();
+    expect(finalCSS.includes("input[type=text]")).toBeFalsy();
+  });
 });

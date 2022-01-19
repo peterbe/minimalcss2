@@ -1,7 +1,7 @@
 import { syntax } from "csso";
 import { parseDocument } from "htmlparser2";
 import type { Document } from "domhandler";
-import render from "dom-serializer";
+// import render from "dom-serializer";
 // import { selectOne, selectAll } from "css-select";
 import { selectAll } from "css-select";
 import * as csstree from "css-tree";
@@ -13,6 +13,9 @@ export type { Options, Result };
 export function minimize(options: Options): Result {
   const doc = parseDocument(options.html);
   // console.log(render(doc));
+  // for (const inp of selectAll("input", doc)) {
+  //   console.log("INP", inp);
+  // }
 
   // Parse CSS to AST
   console.time("parse");
@@ -21,7 +24,7 @@ export function minimize(options: Options): Result {
 
   // To avoid costly lookup for a selector string that appears more
   // than once.
-  const cache = new Map<string, Document | null>();
+  // const cache = new Map<string, Document | null>();
 
   // Traverse AST and modify it
   console.time("walk");
@@ -63,70 +66,115 @@ export function minimize(options: Options): Result {
             //   node.children?.tail
             // )
             // console.log("selectorStringRaw::", selectorStringRaw);
+            // console.log("RAW:", csstree.generate(node));
+
+            const arr: string[] = [];
+            let current = "";
+            node.children.forEach((node) => {
+              // console.log(
+              //   "\tNODE:",
+              //   { node: csstree.generate(node) },
+              //   node.type
+              // );
+              if (csstree.generate(node).trim()) {
+                current += csstree.generate(node);
+              } else {
+                arr.push(reduceCSSSelector(current));
+                current = "";
+              }
+            });
+            if (current) {
+              arr.push(reduceCSSSelector(current));
+            }
+            // console.log("ARR:", arr);
+            if (arr.length === 1) {
+              if (arr[0] === "*" || !arr[0].trim()) {
+                return;
+              }
+            }
 
             // const parents: string[] = [];
-            let parent = "";
+            // let parent = "";
             let bother = true;
-            let i = 0;
-            let parentDocs: Document[] = [doc];
-            node.children.forEach((node) => {
-              console.log("I", i++, { bother });
 
-              if (!bother) return;
+            // let i = 0;
+            let parentDocs: Document[] = [doc];
+            // node.children.forEach((node) => {
+            for (const selector of arr) {
+              // console.log("I", i++, { bother });
+
+              // if (!bother) return;
+              const subDocs: Document[] = [];
+              if (selector === "*") {
+              } else {
+                for (const parentDoc of parentDocs) {
+                  for (const subDoc of selectAll(selector, parentDoc)) {
+                    subDocs.push(subDoc);
+                  }
+                }
+              }
+
+              if (!subDocs.length) {
+                bother = false;
+                break;
+              } else {
+                parentDocs = subDocs;
+              }
 
               // console.log({
               //   TYPE: node.type,
               //   STR: csstree.generate(node),
               //   PARENT: parent,
               // });
-              if (node.type === "TypeSelector") {
-                // const selector = (parent + " " + csstree.generate(node)).trim();
-                const selector = reduceCSSSelector(csstree.generate(node));
-                // parentDoc = parentDoc || doc;
-                console.log({ selector, parent, NODE: csstree.generate(node) });
 
-                // const cached = cache.get(selector);
-                console.log(
-                  "LOOK INSIDE",
-                  parentDocs.map((parentDoc) => render(parentDoc)).join("--\n")
-                );
+              // if (node.type === "TypeSelector") {
+              //   // const selector = (parent + " " + csstree.generate(node)).trim();
+              //   const selector = reduceCSSSelector(csstree.generate(node));
+              //   // parentDoc = parentDoc || doc;
+              //   // console.log({ selector, parent, NODE: csstree.generate(node) });
 
-                const subDocs: Document[] = [];
-                for (const parentDoc of parentDocs) {
-                  for (const subDoc of selectAll(selector, parentDoc)) {
-                    subDocs.push(subDoc);
-                  }
-                }
-                console.log(
-                  subDocs.length ? "FOUND SOMETHING" : "FOUND NOTHING"
-                );
+              //   // const cached = cache.get(selector);
+              //   // console.log(
+              //   //   `LOOK FOR ${selector} INSIDE`,
+              //   //   parentDocs.map((parentDoc) => render(parentDoc)).join("--\n")
+              //   // );
 
-                if (!subDocs.length) {
-                  // console.log(
-                  //   "STOP GOING FURTHER",
-                  //   selector,
-                  //   "NOT FOUND IN",
-                  //   parentDocs
-                  //     .map((parentDoc) => render(parentDoc))
-                  //     .join("--\n")
-                  // );
+              //   const subDocs: Document[] = [];
+              //   for (const parentDoc of parentDocs) {
+              //     for (const subDoc of selectAll(selector, parentDoc)) {
+              //       subDocs.push(subDoc);
+              //     }
+              //   }
+              //   // console.log(
+              //   //   subDocs.length ? "FOUND SOMETHING" : "FOUND NOTHING"
+              //   // );
 
-                  // There's no point going deeper!
-                  cache.set(selector, null);
-                  bother = false;
-                } else {
-                  // console.log(
-                  //   "NEXT SUBDOC:",
-                  //   subDocs.map((subDoc) => render(subDoc)).join("--")
-                  // );
-                  // cache.set(parent, subDoc);
-                  parentDocs = subDocs;
-                  parent = selector;
-                  // console.log("CACHE KEYS", Array.from(cache.keys()));
-                }
-              } else {
-                // parent += ' '
-              }
+              //   if (!subDocs.length) {
+              //     // console.log(
+              //     //   "STOP GOING FURTHER",
+              //     //   selector,
+              //     //   "NOT FOUND IN",
+              //     //   parentDocs
+              //     //     .map((parentDoc) => render(parentDoc))
+              //     //     .join("--\n")
+              //     // );
+
+              //     // There's no point going deeper!
+              //     cache.set(selector, null);
+              //     bother = false;
+              //   } else {
+              //     // console.log(
+              //     //   "NEXT SUBDOC:",
+              //     //   subDocs.map((subDoc) => render(subDoc)).join("--")
+              //     // );
+              //     // cache.set(parent, subDoc);
+              //     parentDocs = subDocs;
+              //     // parent = selector;
+              //     // console.log("CACHE KEYS", Array.from(cache.keys()));
+              //   }
+              // } else {
+              //   // parent += ' '
+              // }
 
               // if (node.type === "WhiteSpace") {
               // parents.push(parent);
@@ -173,15 +221,17 @@ export function minimize(options: Options): Result {
               // } else {
               //   cache.set(parent, false);
               // }
-            });
+            }
 
-            console.log("\n");
+            // console.log("\n");
 
             if (!bother) {
-              console.log("DELETE", csstree.generate(node));
+              // console.log("DELETE", csstree.generate(node));
 
               list.remove(item);
               return;
+            } else {
+              // console.log("KEEP", csstree.generate(node));
             }
 
             // const selectorStringRaw = csstree.generate(node);
@@ -276,7 +326,9 @@ export function minimize(options: Options): Result {
   //    h1 { color: blue; font-weight: bold; }
   //
   console.time("compress");
-  const compressedAST = syntax.compress(ast).ast;
+  const compressedAST = syntax.compress(ast, {
+    comments: options.removeExclamationComments ? false : true,
+  }).ast;
   console.timeEnd("compress");
 
   // Walk and modify the AST now when everything's been walked at least once.
