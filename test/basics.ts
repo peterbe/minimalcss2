@@ -358,70 +358,32 @@ describe("Basics", () => {
     expect(finalCSS.includes("@keyframes slidein")).toBeTruthy();
     expect(finalCSS.includes("@keyframes RotateSlot")).toBeFalsy();
   });
-});
 
-describe("Weirdos", () => {
-  it("should cope with :before and ::after", () => {
+  it("should should look inside all possible DOM trees", () => {
+    // This proves that we don't overzealously cache.
+    // After finding the first `div p` and look for `i` in there,
+    // we're going to get a nothing at first.
+    // But, it's important to look in ALL `div p` sub-trees.
     const html = `
     <html>
-      <h1>Header</h1>
-    </html>
-    `;
-    // See https://developer.mozilla.org/en-US/docs/Web/CSS/::before
-    // See https://developer.mozilla.org/en-US/docs/Web/CSS/::after
-    const css = `
-    a::after { content: "→" }
-    h1:after { text-decoration: underline }
+      <div>
+        <p>
+          <b>Bold</b>
+        </p>
+        <p>
+          <i>Italic</i>
+        </p>
+      </div>
 
-    a::before, h1:before { content: "♥"; }
-    `;
-    const finalCSS = getFinalCSS({ html, css });
-    expect(
-      finalCSS.includes("h1:after{text-decoration:underline}")
-    ).toBeTruthy();
-    expect(finalCSS.includes('h1:before{content:"♥"}')).toBeTruthy();
-    expect(finalCSS.includes("a:")).toBeFalsy();
-  });
-
-  it("should always keep the * selector", () => {
-    const html = `
-    <html>
-      <h1>Header</h1>
     </html>
     `;
     const css = `
-    *,
-    :after,
-    :before {
-      box-sizing: inherit;
-    }
-    html, body {
-      box-sizing: border-box;
-    }
+    div p i { color: pink }
     `;
-    const finalCSS = getFinalCSS({ html, css });
-    expect(
-      finalCSS.includes("*,:after,:before{box-sizing:inherit}")
-    ).toBeTruthy();
-    expect(finalCSS.includes("html{box-sizing:border-box}")).toBeTruthy();
+    const finalCSS = getFinalCSS({
+      html,
+      css,
+    });
+    expect(finalCSS).toBe("div p i{color:pink}");
   });
-
-  // it("should throw on failing selectors", () => {
-  //   const html = `
-  //   <html>
-  //     <h1>Header</h1>
-  //   </html>
-  //   `;
-  //   const css = `
-  //   💥~>+🐿 { ... }
-  //   `;
-  //   const trouble = () => {
-  //     getFinalCSS({ html, css });
-  //   };
-  //   const log = console.log;
-  //   console.log = jest.fn();
-  //   expect(trouble).toThrow();
-  //   expect(console.log).toHaveBeenCalled();
-  //   console.log = log;
-  // });
 });

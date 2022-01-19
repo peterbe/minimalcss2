@@ -1,7 +1,9 @@
 import { syntax } from "csso";
 import { parseDocument } from "htmlparser2";
 import type { Document } from "domhandler";
-import { selectOne } from "css-select";
+import render from "dom-serializer";
+// import { selectOne, selectAll } from "css-select";
+import { selectAll } from "css-select";
 import * as csstree from "css-tree";
 
 import { postProcessOptimize } from "./post-process";
@@ -10,6 +12,7 @@ export type { Options, Result };
 
 export function minimize(options: Options): Result {
   const doc = parseDocument(options.html);
+  // console.log(render(doc));
 
   // Parse CSS to AST
   console.time("parse");
@@ -18,7 +21,7 @@ export function minimize(options: Options): Result {
 
   // To avoid costly lookup for a selector string that appears more
   // than once.
-  const cache = new Map<string, boolean>();
+  const cache = new Map<string, Document | null>();
 
   // Traverse AST and modify it
   console.time("walk");
@@ -55,58 +58,138 @@ export function minimize(options: Options): Result {
         // );
 
         node.prelude.children.forEach((node, item, list) => {
-          const selectorStringRaw = csstree.generate(node);
-          const selectorString = reduceCSSSelector(selectorStringRaw);
-
           if (node.type === "Selector") {
             // node.children.prevUntil(
             //   node.children?.tail
             // )
             // console.log("selectorStringRaw::", selectorStringRaw);
 
-            const parents: string[] = [];
+            // const parents: string[] = [];
             let parent = "";
             let bother = true;
+            let i = 0;
+            let parentDocs: Document[] = [doc];
             node.children.forEach((node) => {
-              if (bother) {
-                if (node.type === "Combinator" || node.type === "WhiteSpace") {
-                  // console.log("!!");
-                  parents.push(parent);
-                  const selectorParentString = reduceCSSSelector(
-                    parents.slice(-1)[0]
-                  );
+              console.log("I", i++, { bother });
 
-                  if (cache.has(selectorParentString)) {
-                    if (!cache.get(selectorParentString)) {
-                      bother = false;
-                    }
-                  } else {
-                    if (
-                      selectorParentString === "" ||
-                      present(doc, selectorParentString)
-                    ) {
-                      cache.set(selectorParentString, true);
-                    } else {
-                      cache.set(selectorParentString, false);
-                      bother = false;
-                    }
+              if (!bother) return;
+
+              // console.log({
+              //   TYPE: node.type,
+              //   STR: csstree.generate(node),
+              //   PARENT: parent,
+              // });
+              if (node.type === "TypeSelector") {
+                // const selector = (parent + " " + csstree.generate(node)).trim();
+                const selector = reduceCSSSelector(csstree.generate(node));
+                // parentDoc = parentDoc || doc;
+                console.log({ selector, parent, NODE: csstree.generate(node) });
+
+                // const cached = cache.get(selector);
+                console.log(
+                  "LOOK INSIDE",
+                  parentDocs.map((parentDoc) => render(parentDoc)).join("--\n")
+                );
+
+                const subDocs: Document[] = [];
+                for (const parentDoc of parentDocs) {
+                  for (const subDoc of selectAll(selector, parentDoc)) {
+                    subDocs.push(subDoc);
                   }
+                }
+                console.log(
+                  subDocs.length ? "FOUND SOMETHING" : "FOUND NOTHING"
+                );
 
-                  // console.log("CHECK!!!", parents, parents.slice(-1));
-                  // console.log("CHECK!!!", selectorParentString);
-                  parent += " ";
+                if (!subDocs.length) {
+                  // console.log(
+                  //   "STOP GOING FURTHER",
+                  //   selector,
+                  //   "NOT FOUND IN",
+                  //   parentDocs
+                  //     .map((parentDoc) => render(parentDoc))
+                  //     .join("--\n")
+                  // );
+
+                  // There's no point going deeper!
+                  cache.set(selector, null);
+                  bother = false;
                 } else {
-                  // console.log(csstree.generate(node));
-                  parent += csstree.generate(node);
+                  // console.log(
+                  //   "NEXT SUBDOC:",
+                  //   subDocs.map((subDoc) => render(subDoc)).join("--")
+                  // );
+                  // cache.set(parent, subDoc);
+                  parentDocs = subDocs;
+                  parent = selector;
+                  // console.log("CACHE KEYS", Array.from(cache.keys()));
                 }
               } else {
-                cache.set(parent, false);
+                // parent += ' '
               }
+
+              // if (node.type === "WhiteSpace") {
+              // parents.push(parent);
+              // const selectorParentString = reduceCSSSelector(
+              //     // parents.slice(-1)[0]
+              //     csstree.generate(node)
+              //   );
+              //   console.log("CHECK", selectorParentString);
+              // } else {
+              //   // console.log("CHEK?", node.type, csstree.generate(node));
+              // }
+              // if (bother) {
+              //   if (node.type === "Combinator" || node.type === "WhiteSpace") {
+              //     // console.log("!!");
+              //     parents.push(parent);
+              //     const selectorParentString = reduceCSSSelector(
+              //       parents.slice(-1)[0]
+              //     );
+              //     console.log("CHECK", selectorParentString);
+
+              //     // if (cache.has(selectorParentString)) {
+              //     //   if (!cache.get(selectorParentString)) {
+              //     //     bother = false;
+              //     //   }
+              //     // } else {
+              //     //   if (
+              //     //     selectorParentString === "" ||
+              //     //     present(doc, selectorParentString)
+              //     //   ) {
+              //     //     cache.set(selectorParentString, true);
+              //     //   } else {
+              //     //     cache.set(selectorParentString, false);
+              //     //     bother = false;
+              //     //   }
+              //     // }
+
+              //     // console.log("CHECK!!!", parents, parents.slice(-1));
+              //     // console.log("CHECK!!!", selectorParentString);
+              // parent += " ";
+              //   } else {
+              //     // console.log(csstree.generate(node));
+              // parent += csstree.generate(node);
+              //   }
+              // } else {
+              //   cache.set(parent, false);
+              // }
             });
+
+            console.log("\n");
+
             if (!bother) {
+              console.log("DELETE", csstree.generate(node));
+
               list.remove(item);
               return;
             }
+
+            // const selectorStringRaw = csstree.generate(node);
+            // const selectorString = reduceCSSSelector(selectorStringRaw);
+            // console.log({ selectorString });
+            // const subDoc = selectOne(selectorString, doc);
+            // console.log(!!subDoc);
+
             // parents.push(parent);
             // console.log("PARENTS:", parents);
             // console.log("\n");
@@ -155,20 +238,20 @@ export function minimize(options: Options): Result {
           //   }
           // });
 
-          // If we have come across this selector string before, rely on the
-          // cache Map exclusively.
-          if (cache.has(selectorString)) {
-            if (!cache.get(selectorString)) {
-              list.remove(item);
-            }
-          } else {
-            if (selectorString === "" || present(doc, selectorString)) {
-              cache.set(selectorString, true);
-            } else {
-              cache.set(selectorString, false);
-              list.remove(item);
-            }
-          }
+          // // If we have come across this selector string before, rely on the
+          // // cache Map exclusively.
+          // if (cache.has(selectorString)) {
+          //   if (!cache.get(selectorString)) {
+          //     list.remove(item);
+          //   }
+          // } else {
+          //   if (selectorString === "" || present(doc, selectorString)) {
+          //     cache.set(selectorString, true);
+          //   } else {
+          //     cache.set(selectorString, false);
+          //     list.remove(item);
+          //   }
+          // }
         });
 
         // `node.prelude.children.isEmpty` is a getter, not a method.
@@ -212,17 +295,17 @@ export function minimize(options: Options): Result {
   return { finalCSS, sizeBefore, sizeAfter, ast, compressedAST };
 }
 
-function present(doc: Document, selector: string) {
-  try {
-    // console.log("SELECTOR", selector);
+// function present(doc: Document, selector: string) {
+//   try {
+//     // console.log("SELECTOR", selector);
 
-    return selectOne(selector, doc) !== null;
-  } catch (err) {
-    console.log("Error caused on:", { selector });
+//     return selectOne(selector, doc) !== null;
+//   } catch (err) {
+//     console.log("Error caused on:", { selector });
 
-    throw err;
-  }
-}
+//     throw err;
+//   }
+// }
 
 /**
  * Reduce a CSS selector to be without any pseudo class parts.
