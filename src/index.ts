@@ -13,7 +13,9 @@ import type { Options, Result } from "./types";
 export type { Options, Result };
 
 export function minimize(options: Options): Result {
+  console.time("parse");
   const $ = cheerio.load(options.html);
+  console.timeEnd("parse");
 
   // Parse CSS to AST
   const ast = csstree.parse(options.css);
@@ -21,7 +23,9 @@ export function minimize(options: Options): Result {
   // To avoid costly lookup for a selector string that appears more
   // than once.
   // const cache = new Map<string, Document | null>();
-  const nevers: Map<string, boolean | Cheerio<Node>> = new Map();
+  const cache: Map<string, null | Cheerio<Node>> = new Map();
+
+  let lookupsMade: string[] = [];
 
   // Traverse AST and modify it
   console.time("walk");
@@ -65,28 +69,74 @@ export function minimize(options: Options): Result {
                 continue;
               }
               combined.push(selector);
+              const cacheKey = combined.join(" ");
 
               if (!parentDocs) {
                 // We're at the root
-                const subDocs = $(selector);
-                if (!subDocs.length) {
+
+                let cached = cache.get(cacheKey);
+                // `cached` is either null, no nodes, or some nodes
+                if (cached === null) {
                   bother = false;
-                  nevers.set(combined.join(" "), false);
                   break;
+                } else if (cached === undefined) {
+                  const subDocs = $(selector);
+                  lookupsMade.push(cacheKey);
+                  if (!subDocs.length) {
+                    bother = false;
+                    cache.set(cacheKey, null);
+                    break;
+                  } else {
+                    parentDocs = subDocs;
+                    cache.set(cacheKey, subDocs);
+                  }
                 } else {
-                  parentDocs = subDocs;
+                  if (!cached.length) {
+                    bother = false;
+                    break;
+                  } else {
+                    parentDocs = cached;
+                  }
                 }
               } else {
                 // We're inside 'parentDocs'
-                const subDocs = $(selector, parentDocs) as Cheerio<Node>;
-                if (!subDocs.length) {
+
+                let cached = cache.get(cacheKey);
+                // `cached` is either null, no nodes, or some nodes
+                if (cached === null) {
                   bother = false;
-                  // cache.set(combined.join(' '))
-                  nevers.set(combined.join(" "), false);
                   break;
+                } else if (cached === undefined) {
+                  const subDocs = $(selector, parentDocs) as Cheerio<Node>;
+                  lookupsMade.push(cacheKey);
+                  if (!subDocs.length) {
+                    bother = false;
+                    // cache.set(combined.concat(selector).join(" "), null);
+                    cache.set(cacheKey, null);
+                    break;
+                  } else {
+                    parentDocs = subDocs;
+                    cache.set(cacheKey, subDocs);
+                  }
                 } else {
-                  parentDocs = subDocs;
+                  if (!cached.length) {
+                    bother = false;
+                    break;
+                  } else {
+                    parentDocs = cached;
+                  }
                 }
+
+                // const subDocs = $(selector, parentDocs) as Cheerio<Node>;
+                // if (!subDocs.length) {
+                //   bother = false;
+                //   // cache.set(combined.join(' '))
+                //   cache.set(cacheKey, null);
+                //   break;
+                // } else {
+                //   cache.set(cacheKey, subDocs);
+                //   parentDocs = subDocs;
+                // }
               }
             }
 
@@ -109,6 +159,20 @@ export function minimize(options: Options): Result {
     },
   });
   console.timeEnd("walk");
+  // console.log(cache);
+  // for (const [key, stuff] of cache.entries()) {
+  //   if (stuff === null) {
+  //     console.log(`KEY: '${key}'`, "never!");
+  //   } else {
+  //     console.log(`KEY: '${key}'`, stuff.length);
+  //   }
+  // }
+  // console.log(
+  //   "Looups made:",
+  //   lookupsMade.length,
+  //   new Set(lookupsMade).size,
+  //   lookupsMade
+  // );
 
   // This makes it so that things like:
   //
@@ -130,9 +194,9 @@ export function minimize(options: Options): Result {
   postProcessOptimize(compressedAST);
   // console.timeEnd("postprocess");
 
-  // console.time("finalcss");
+  console.time("finalcss");
   let finalCSS = csstree.generate(compressedAST);
-  // console.timeEnd("finalcss");
+  console.timeEnd("finalcss");
   const sizeBefore = options.css.length;
   const sizeAfter = finalCSS.length;
   if (options.includeStatsComment) {
@@ -174,37 +238,3 @@ function reduceCSSSelector(selector: string): string {
     /:(?=([^"'\\]*(\\.|["']([^"'\\]*\\.)*[^"'\\]*['"]))*[^"']*$)/g
   )[0];
 }
-
-/**
- * Given a string CSS selector (e.g. '.foo .bar .baz') return it with the
- * last piece (split by whitespace) omitted (e.g. '.foo .bar').
- * If there is no parent, return an empty string.
- *
- * @param {string} selector
- * @return {string[]}
- */
-// function getParentSelectors(selector: string): string[] {
-//   const parentSelectors: string[] = [];
-//   if (!selector) return parentSelectors;
-
-//   // const selectorAst = csstree.parse(selector, { context: "selector" });
-
-//   // console.log(selectorAst);
-
-//   return parentSelectors;
-//   // let generatedCSS;
-//   // while (selectorAst.children.tail) {
-//   //   selectorAst.children.prevUntil(
-//   //     selectorAst.children.tail,
-//   //     (node, item, list) => {
-//   //       list.remove(item);
-//   //       return node.type === "Combinator" || node.type === "WhiteSpace";
-//   //     }
-//   //   );
-//   //   generatedCSS = csstree.generate(selectorAst);
-//   //   if (generatedCSS) {
-//   //     parentSelectors.push(generatedCSS);
-//   //   }
-//   // }
-//   // return parentSelectors.reverse();
-// }
