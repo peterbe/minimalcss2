@@ -1,9 +1,11 @@
 import { syntax } from "csso";
-import { parseDocument } from "htmlparser2";
-import type { Document } from "domhandler";
+// import { parseDocument } from "htmlparser2";
+// import type { Document } from "domhandler";
 // import render from "dom-serializer";
 // import { selectOne, selectAll } from "css-select";
-import { selectAll } from "css-select";
+// import { selectAll } from "css-select";
+// import cheerio, { Cheerio, CheerioAPI, Node } from "cheerio";
+import cheerio, { Cheerio, Node } from "cheerio";
 import * as csstree from "css-tree";
 
 import { postProcessOptimize } from "./post-process";
@@ -11,7 +13,9 @@ import type { Options, Result } from "./types";
 export type { Options, Result };
 
 export function minimize(options: Options): Result {
-  const doc = parseDocument(options.html);
+  console.time("load");
+  const $ = cheerio.load(options.html);
+  console.timeEnd("load");
   // console.log(render(doc));
   // for (const inp of selectAll("input", doc)) {
   //   console.log("INP", inp);
@@ -25,6 +29,7 @@ export function minimize(options: Options): Result {
   // To avoid costly lookup for a selector string that appears more
   // than once.
   // const cache = new Map<string, Document | null>();
+  const nevers: Map<string, boolean | Cheerio<Node>> = new Map();
 
   // Traverse AST and modify it
   console.time("walk");
@@ -98,28 +103,56 @@ export function minimize(options: Options): Result {
             let bother = true;
 
             // let i = 0;
-            let parentDocs: Document[] = [doc];
+            let parentDocs: null | Cheerio<Node> = null;
             // node.children.forEach((node) => {
+            const combined: string[] = [];
             for (const selector of arr) {
               // console.log("I", i++, { bother });
 
               // if (!bother) return;
-              const subDocs: Document[] = [];
+              // const subDocs: CheerioAPI = parentDocs;
               if (selector === "*") {
+                continue;
+              }
+              // for (const parentDoc of parentDocs) {
+              //   for (const subDoc of selectAll(selector, parentDoc)) {
+              //     subDocs.push(subDoc);
+              //   }
+              // }
+              combined.push(selector);
+
+              if (!parentDocs) {
+                // We're at the root
+                const subDocs = $(selector);
+                if (!subDocs.length) {
+                  bother = false;
+                  nevers.set(combined.join(" "), false);
+                  break;
+                } else {
+                  parentDocs = subDocs;
+                }
               } else {
-                for (const parentDoc of parentDocs) {
-                  for (const subDoc of selectAll(selector, parentDoc)) {
-                    subDocs.push(subDoc);
-                  }
+                // We're inside 'parentDocs'
+                const subDocs = $(selector, parentDocs) as Cheerio<Node>;
+                if (!subDocs.length) {
+                  bother = false;
+                  // cache.set(combined.join(' '))
+                  nevers.set(combined.join(" "), false);
+                  break;
+                } else {
+                  parentDocs = subDocs;
                 }
               }
+              // const subDocs = parentDocs
+              //   ? $(selector, parentDocs)
+              //   : $(selector);
 
-              if (!subDocs.length) {
-                bother = false;
-                break;
-              } else {
-                parentDocs = subDocs;
-              }
+              // if (!subDocs.length) {
+              //   bother = false;
+              //   break;
+              // } else {
+              //   parentDocs = subDocs;
+              // }
 
               // console.log({
               //   TYPE: node.type,

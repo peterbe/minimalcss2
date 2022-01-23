@@ -30,10 +30,9 @@
   "author": "Peter Bengtsson",
   "license": "MIT",
   "dependencies": {
-    "css-select": "^4.2.1",
+    "cheerio": "1.0.0-rc.10",
     "css-tree": "2.0.4",
-    "csso": "5.0.2",
-    "htmlparser2": "^7.2.0"
+    "csso": "5.0.2"
   },
   "jest": {
     "preset": "ts-jest",
