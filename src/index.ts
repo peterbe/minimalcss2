@@ -55,8 +55,6 @@ export function minimize(options: Options): Result {
               }
             }
 
-            // const parents: string[] = [];
-            // let parent = "";
             let bother = true;
 
             let parentDocs: null | Cheerio<Node> = null;
@@ -68,75 +66,37 @@ export function minimize(options: Options): Result {
               combined.push(selector);
               const cacheKey = combined.join(" ");
 
-              if (!parentDocs) {
-                // We're at the root
-
-                const cached = cache.get(cacheKey);
-                // `cached` is either null, no nodes, or some nodes
-                if (cached === null) {
-                  bother = false;
-                  break;
-                } else if (cached === undefined) {
-                  const subDocs = $(selector);
-                  if (!subDocs.length) {
-                    bother = false;
-                    cache.set(cacheKey, null);
-                    break;
-                  } else {
-                    parentDocs = subDocs;
-                    cache.set(cacheKey, subDocs);
-                  }
+              const cached = cache.get(cacheKey);
+              // `cached` is either null, no nodes, or some nodes
+              if (cached === null) {
+                bother = false;
+                break;
+              } else if (cached === undefined) {
+                let subDocs: Cheerio<Node>;
+                if (!parentDocs) {
+                  subDocs = $(selector);
                 } else {
-                  if (!cached.length) {
-                    bother = false;
-                    break;
-                  } else {
-                    parentDocs = cached;
-                  }
+                  subDocs = $(selector, parentDocs);
+                }
+                if (!subDocs.length) {
+                  bother = false;
+                  cache.set(cacheKey, null);
+                  break;
+                } else {
+                  parentDocs = subDocs;
+                  cache.set(cacheKey, subDocs);
                 }
               } else {
-                // We're inside 'parentDocs'
-
-                const cached = cache.get(cacheKey);
-                // `cached` is either null, no nodes, or some nodes
-                if (cached === null) {
+                if (!cached.length) {
                   bother = false;
                   break;
-                } else if (cached === undefined) {
-                  const subDocs = $(selector, parentDocs) as Cheerio<Node>;
-                  if (!subDocs.length) {
-                    bother = false;
-                    // cache.set(combined.concat(selector).join(" "), null);
-                    cache.set(cacheKey, null);
-                    break;
-                  } else {
-                    parentDocs = subDocs;
-                    cache.set(cacheKey, subDocs);
-                  }
                 } else {
-                  if (!cached.length) {
-                    bother = false;
-                    break;
-                  } else {
-                    parentDocs = cached;
-                  }
+                  parentDocs = cached;
                 }
-
-                // const subDocs = $(selector, parentDocs) as Cheerio<Node>;
-                // if (!subDocs.length) {
-                //   bother = false;
-                //   // cache.set(combined.join(' '))
-                //   cache.set(cacheKey, null);
-                //   break;
-                // } else {
-                //   cache.set(cacheKey, subDocs);
-                //   parentDocs = subDocs;
-                // }
               }
             }
 
             if (!bother) {
-              // console.log("DELETE", csstree.generate(node));
               list.remove(item);
               return;
             }
