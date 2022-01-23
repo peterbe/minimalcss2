@@ -47,19 +47,7 @@ export function minimize(options: Options): Result {
       if (node.prelude.type === "SelectorList") {
         node.prelude.children.forEach((node, item, list) => {
           if (node.type === "Selector") {
-            const arr: string[] = [];
-            let current = "";
-            node.children.forEach((node) => {
-              if (csstree.generate(node).trim()) {
-                current += csstree.generate(node);
-              } else {
-                arr.push(reduceCSSSelector(current));
-                current = "";
-              }
-            });
-            if (current) {
-              arr.push(reduceCSSSelector(current));
-            }
+            const arr = getSelectorList(node);
             if (arr.length === 1) {
               if (arr[0] === "*" || !arr[0].trim()) {
                 return;
@@ -151,6 +139,25 @@ export function minimize(options: Options): Result {
     finalCSS = `/* length before: ${sizeBefore} length after: ${sizeAfter} */\n${finalCSS}`;
   }
   return { finalCSS, sizeBefore, sizeAfter, ast, compressedAST };
+}
+
+function getSelectorList(node: csstree.CssNode): string[] {
+  const arr: string[] = [];
+  let current = "";
+  if (node.type === "Selector") {
+    node.children.forEach((node) => {
+      if (csstree.generate(node).trim()) {
+        current += csstree.generate(node);
+      } else {
+        arr.push(reduceCSSSelector(current));
+        current = "";
+      }
+    });
+  }
+  if (current) {
+    arr.push(reduceCSSSelector(current));
+  }
+  return arr;
 }
 
 /**
