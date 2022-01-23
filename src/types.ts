@@ -5,6 +5,7 @@ export interface Options {
   css: string;
   // ignoreCSSErrors?: boolean;
   includeStatsComment?: boolean;
+  removeExclamationComments?: boolean;
 }
 
 export interface Result {
