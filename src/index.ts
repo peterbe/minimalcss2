@@ -22,10 +22,7 @@ export function minimize(options: Options): Result {
 
   // To avoid costly lookup for a selector string that appears more
   // than once.
-  // const cache = new Map<string, Document | null>();
   const cache: Map<string, null | Cheerio<Node>> = new Map();
-
-  let lookupsMade: string[] = [];
 
   // Traverse AST and modify it
   console.time("walk");
@@ -74,14 +71,13 @@ export function minimize(options: Options): Result {
               if (!parentDocs) {
                 // We're at the root
 
-                let cached = cache.get(cacheKey);
+                const cached = cache.get(cacheKey);
                 // `cached` is either null, no nodes, or some nodes
                 if (cached === null) {
                   bother = false;
                   break;
                 } else if (cached === undefined) {
                   const subDocs = $(selector);
-                  lookupsMade.push(cacheKey);
                   if (!subDocs.length) {
                     bother = false;
                     cache.set(cacheKey, null);
@@ -101,14 +97,13 @@ export function minimize(options: Options): Result {
               } else {
                 // We're inside 'parentDocs'
 
-                let cached = cache.get(cacheKey);
+                const cached = cache.get(cacheKey);
                 // `cached` is either null, no nodes, or some nodes
                 if (cached === null) {
                   bother = false;
                   break;
                 } else if (cached === undefined) {
                   const subDocs = $(selector, parentDocs) as Cheerio<Node>;
-                  lookupsMade.push(cacheKey);
                   if (!subDocs.length) {
                     bother = false;
                     // cache.set(combined.concat(selector).join(" "), null);
@@ -159,20 +154,6 @@ export function minimize(options: Options): Result {
     },
   });
   console.timeEnd("walk");
-  // console.log(cache);
-  // for (const [key, stuff] of cache.entries()) {
-  //   if (stuff === null) {
-  //     console.log(`KEY: '${key}'`, "never!");
-  //   } else {
-  //     console.log(`KEY: '${key}'`, stuff.length);
-  //   }
-  // }
-  // console.log(
-  //   "Looups made:",
-  //   lookupsMade.length,
-  //   new Set(lookupsMade).size,
-  //   lookupsMade
-  // );
 
   // This makes it so that things like:
   //

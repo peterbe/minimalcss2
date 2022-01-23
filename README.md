@@ -68,20 +68,22 @@ Imagine this HTML:
 
 ```html
 <div>
-  <p>
-    Plain text
-  </p>
-  <p>
-    This is <b>bold</b>
-  </p>
+  <p>Plain text</p>
+  <p>This is <b>bold</b></p>
 </div>
 ```
 
 and this CSS:
 
 ```css
-div form, div form input { color: maroon; }
-div p b, div p em { color: brown; }
+div form,
+div form input {
+  color: maroon;
+}
+div p b,
+div p em {
+  color: brown;
+}
 ```
 
 After parsing the CSS selector, using the AST, it combutes it into
@@ -89,32 +91,32 @@ two arrays:
 
 ```js
 [
-  ['div', 'form'],
-  ['div', 'form', 'input'],
-  ['div', 'p', 'b'],
-  ['div', 'p', 'em'],
-]
+  ["div", "form"],
+  ["div", "form", "input"],
+  ["div", "p", "b"],
+  ["div", "p", "em"],
+];
 ```
 
 If you "flatten" those two arrays with a `' '` separator, you get:
 
 ```js
 [
-  'div',
-  'div form',
+  "div",
+  "div form",
 
-  'div',
-  'div form',
-  'div form input',
+  "div",
+  "div form",
+  "div form input",
 
-  'div',
-  'div p',
-  'div p b',
+  "div",
+  "div p",
+  "div p b",
 
-  'div',
-  'div p',
-  'div p em',
-]
+  "div",
+  "div p",
+  "div p em",
+];
 ```
 
 Now, you can loop over this flat array and for each node, cache what the
