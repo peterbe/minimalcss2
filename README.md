@@ -120,7 +120,7 @@ If you "flatten" those two arrays with a `' '` separator, you get:
 Now, you can loop over this flat array and for each node, cache what the
 outcome of that was:
 
-```
+```txt
 div               Lookup made               >0 things found (1)
 div form          Lookup made from (1)      0 things found (2)
 
