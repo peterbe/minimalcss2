@@ -175,7 +175,8 @@ function getSelectorList(node: csstree.CssNode): string[] {
  * instead (using ' instead of ").
  */
 function reduceCSSSelector(selector: string): string {
-  return selector.split(
-    /:(?=([^"'\\]*(\\.|["']([^"'\\]*\\.)*[^"'\\]*['"]))*[^"']*$)/g
-  )[0];
+  return selector
+    .replace("\\:", "_ESCAPED_COLON_")
+    .split(/:(?=([^"'\\]*(\\.|["']([^"'\\]*\\.)*[^"'\\]*['"]))*[^"']*$)/g)[0]
+    .replace("_ESCAPED_COLON_", "\\:");
 }

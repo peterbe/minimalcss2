@@ -418,4 +418,24 @@ describe("Basics", () => {
     expect(finalCSS.includes("input[type=search]")).toBeFalsy();
     expect(finalCSS.includes("input[type=text]")).toBeFalsy();
   });
+
+  it("should not choke on escaped colons in selectors (hihi)", () => {
+    const html = `
+    <html>
+      <body>
+        <a href="#" class="hover:color-bg-accent">Link</a>
+      </body>
+    </html>
+    `;
+    const css = `
+    .hover\\:color-bg-accent:hover {
+      color: pink;
+    }
+    `;
+    const finalCSS = getFinalCSS({
+      html,
+      css,
+    });
+    expect(finalCSS).toContain(".hover\\:color-bg-accent:hover{color:pink}");
+  });
 });
