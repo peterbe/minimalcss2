@@ -31,7 +31,7 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "1.0.0-rc.10",
-    "css-tree": "2.0.4",
+    "css-tree": "2.1.0",
     "csso": "5.0.2"
   },
   "jest": {
