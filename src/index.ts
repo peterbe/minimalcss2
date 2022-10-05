@@ -1,10 +1,4 @@
 import { syntax } from "csso";
-// import { parseDocument } from "htmlparser2";
-// import type { Document } from "domhandler";
-// import render from "dom-serializer";
-// import { selectOne, selectAll } from "css-select";
-// import { selectAll } from "css-select";
-// import cheerio, { Cheerio, CheerioAPI, Node } from "cheerio";
 import cheerio, { Cheerio, Node } from "cheerio";
 import * as csstree from "css-tree";
 
