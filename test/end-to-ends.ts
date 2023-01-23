@@ -11,9 +11,7 @@ describe("End-to-ends", () => {
     it(`should cope with <${path.basename(fixture)}>`, () => {
       const html = fs.readFileSync(path.join(fixture, "html.html"), "utf-8");
       const css = fs.readFileSync(path.join(fixture, "css.css"), "utf-8");
-      console.time(path.basename(fixture));
       const { finalCSS, sizeBefore, sizeAfter } = minimize({ html, css });
-      console.timeEnd(path.basename(fixture));
       expect(sizeAfter < sizeBefore).toBeTruthy();
       expect(finalCSS).toBeTruthy();
     });
