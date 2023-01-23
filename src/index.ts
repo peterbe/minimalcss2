@@ -7,9 +7,7 @@ import type { Options, Result } from "./types";
 export type { Options, Result };
 
 export function minimize(options: Options): Result {
-  console.time("parse");
   const $ = cheerio.load(options.html);
-  console.timeEnd("parse");
 
   // Parse CSS to AST
   const ast = csstree.parse(options.css);
@@ -19,7 +17,6 @@ export function minimize(options: Options): Result {
   const cache: Map<string, null | Cheerio<Node>> = new Map();
 
   // Traverse AST and modify it
-  console.time("walk");
   csstree.walk(ast, {
     visit: "Rule",
     enter(node, item, list) {
@@ -100,14 +97,12 @@ export function minimize(options: Options): Result {
         // `node.prelude.children.isEmpty` is a getter, not a method.
         // Pretty sure it's a bug in
         // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/css-tree/index.d.ts
-        // @ts-expect-error But in DefinitelyTyped for css-tree
-        if (node.prelude.children.isEmpty as boolean) {
+        if (node.prelude.children.isEmpty) {
           list.remove(item);
         }
       }
     },
   });
-  console.timeEnd("walk");
 
   // This makes it so that things like:
   //
@@ -118,20 +113,14 @@ export function minimize(options: Options): Result {
   //
   //    h1 { color: blue; font-weight: bold; }
   //
-  console.time("compress");
   const compressedAST = syntax.compress(ast, {
     comments: options.removeExclamationComments ? false : true,
   }).ast;
-  console.timeEnd("compress");
 
   // Walk and modify the AST now when everything's been walked at least once.
-  // console.time("postprocess");
   postProcessOptimize(compressedAST);
-  // console.timeEnd("postprocess");
 
-  console.time("finalcss");
   let finalCSS = csstree.generate(compressedAST);
-  console.timeEnd("finalcss");
   const sizeBefore = options.css.length;
   const sizeAfter = finalCSS.length;
   if (options.includeStatsComment) {
