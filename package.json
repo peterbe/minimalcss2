@@ -63,6 +63,6 @@
     "jest-junit": "15.0.0",
     "prettier": "2.8.7",
     "ts-jest": "29.1.0",
-    "typescript": "5.0.3"
+    "typescript": "5.0.4"
   }
 }
