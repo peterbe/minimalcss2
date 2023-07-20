@@ -22,7 +22,7 @@ describe("Weirdos", () => {
       `;
     const finalCSS = getFinalCSS({ html, css });
     expect(
-      finalCSS.includes("h1:after{text-decoration:underline}")
+      finalCSS.includes("h1:after{text-decoration:underline}"),
     ).toBeTruthy();
     expect(finalCSS.includes('h1:before{content:"♥"}')).toBeTruthy();
     expect(finalCSS.includes("a:")).toBeFalsy();
@@ -46,7 +46,7 @@ describe("Weirdos", () => {
       `;
     const finalCSS = getFinalCSS({ html, css });
     expect(
-      finalCSS.includes("*,:after,:before{box-sizing:inherit}")
+      finalCSS.includes("*,:after,:before{box-sizing:inherit}"),
     ).toBeTruthy();
     expect(finalCSS.includes("html{box-sizing:border-box}")).toBeTruthy();
   });

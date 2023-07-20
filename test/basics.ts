@@ -64,7 +64,7 @@ describe("Basics", () => {
     `;
     const { finalCSS } = minimize({ html, css });
     expect(
-      finalCSS.includes("h1{color:#000;border:1px solid red}")
+      finalCSS.includes("h1{color:#000;border:1px solid red}"),
     ).toBeTruthy();
     expect(finalCSS.includes("h2")).toBeFalsy();
     expect(finalCSS.includes("h3")).toBeFalsy();
@@ -265,7 +265,7 @@ describe("Basics", () => {
     });
     expect(finalCSS.includes('@font-face{font-family:"Lato"')).toBeTruthy();
     expect(
-      finalCSS.includes('a[href]{font-family:Foobar,"Lato"}')
+      finalCSS.includes('a[href]{font-family:Foobar,"Lato"}'),
     ).toBeTruthy();
     expect(finalCSS.includes("Elseness")).toBeFalsy();
   });
@@ -292,7 +292,7 @@ describe("Basics", () => {
       css,
     });
     expect(
-      finalCSS.includes(".SomeSelector{animation:RotateSlot")
+      finalCSS.includes(".SomeSelector{animation:RotateSlot"),
     ).toBeTruthy();
     expect(finalCSS.includes("@keyframes RotateSlot")).toBeTruthy();
   });
@@ -353,7 +353,7 @@ describe("Basics", () => {
       css,
     });
     expect(
-      finalCSS.includes("h1{animation-duration:3s;animation-name:slidein}")
+      finalCSS.includes("h1{animation-duration:3s;animation-name:slidein}"),
     ).toBeTruthy();
     expect(finalCSS.includes("@keyframes slidein")).toBeTruthy();
     expect(finalCSS.includes("@keyframes RotateSlot")).toBeFalsy();
