@@ -28,7 +28,7 @@ export function postProcessOptimize(ast: CssNode) {
       if (this.rule) {
         if (csstree.property(declaration.property).basename === "animation") {
           activeAnimationNames.add(
-            csstree.generate(declaration.value).split(/\s+/)[0]
+            csstree.generate(declaration.value).split(/\s+/)[0],
           );
         } else if (
           csstree.property(declaration.property).basename === "animation-name"
