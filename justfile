@@ -12,3 +12,9 @@ format:
 
 upgrade:
     npx npm-check-updates --interactive
+
+outdated:
+    npm outdated
+
+build:
+    npm run build

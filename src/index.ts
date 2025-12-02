@@ -1,10 +1,13 @@
-import cheerio, { type Cheerio, type Node } from "cheerio";
+import * as cheerio from "cheerio";
 import * as csstree from "css-tree";
 import { syntax } from "csso";
+import type { AnyNode } from "domhandler";
 
 import { postProcessOptimize } from "./post-process";
 import type { Options, Result } from "./types";
 export type { Options, Result };
+
+type CheerioNode = cheerio.Cheerio<AnyNode>;
 
 export function minimize(options: Options): Result {
 	const $ = cheerio.load(options.html);
@@ -14,7 +17,7 @@ export function minimize(options: Options): Result {
 
 	// To avoid costly lookup for a selector string that appears more
 	// than once.
-	const cache: Map<string, null | Cheerio<Node>> = new Map();
+	const cache: Map<string, null | CheerioNode> = new Map();
 
 	// Traverse AST and modify it
 	csstree.walk(ast, {
@@ -48,7 +51,7 @@ export function minimize(options: Options): Result {
 
 						let bother = true;
 
-						let parentDocs: null | Cheerio<Node> = null;
+						let parentDocs: null | CheerioNode = null;
 						const combined: string[] = [];
 						for (const selector of arr) {
 							if (selector === "*") {
@@ -63,7 +66,7 @@ export function minimize(options: Options): Result {
 								bother = false;
 								break;
 							} else if (cached === undefined) {
-								let subDocs: Cheerio<Node>;
+								let subDocs: CheerioNode;
 								if (!parentDocs) {
 									subDocs = $(selector);
 								} else {
