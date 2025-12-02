@@ -1,43 +1,43 @@
-import type { Options } from "../src/types";
 import { minimize } from "../src";
+import type { Options } from "../src/types";
 
 function getFinalCSS(options: Options) {
-  return minimize(options).finalCSS;
+	return minimize(options).finalCSS;
 }
 
 describe("Basics", () => {
-  it("should return a string of css", () => {
-    const html = `
+	it("should return a string of css", () => {
+		const html = `
     <html>
       <h1>Header</h1>
     </html>
     `;
-    const css = `
+		const css = `
     h1, h2, h3 { color: blue }
     ol, li { color: blue }
     `;
-    const { finalCSS, sizeBefore, sizeAfter } = minimize({ html, css });
-    expect(typeof finalCSS).toBe("string");
-    expect(typeof sizeBefore).toBe("number");
-    expect(typeof sizeAfter).toBe("number");
-  });
+		const { finalCSS, sizeBefore, sizeAfter } = minimize({ html, css });
+		expect(typeof finalCSS).toBe("string");
+		expect(typeof sizeBefore).toBe("number");
+		expect(typeof sizeAfter).toBe("number");
+	});
 
-  it("should be able to benefit from caching", () => {
-    const html = `
+	it("should be able to benefit from caching", () => {
+		const html = `
     <html>
       <h1>Header</h1>
     </html>
     `;
-    const css = `
+		const css = `
     h1, h2, h3 { color: blue }
     h2 { color: orange }
     `;
-    const { finalCSS } = minimize({ html, css });
-    expect(typeof finalCSS).toBe("string");
-  });
+		const { finalCSS } = minimize({ html, css });
+		expect(typeof finalCSS).toBe("string");
+	});
 
-  it("should reduce the selectors", () => {
-    const html = `
+	it("should reduce the selectors", () => {
+		const html = `
     <!doctype html>
     <html>
         <head>
@@ -54,7 +54,7 @@ describe("Basics", () => {
         </body>
     </html>
     `;
-    const css = `
+		const css = `
     html { border: 0; }
     body, section { padding: 0; }
     h1, h2, h3 { color: black; }
@@ -62,81 +62,81 @@ describe("Basics", () => {
     div.ingress p { font-weight: bold; }
     div.ingress em { font-weight: normal; }
     `;
-    const { finalCSS } = minimize({ html, css });
-    expect(
-      finalCSS.includes("h1{color:#000;border:1px solid red}"),
-    ).toBeTruthy();
-    expect(finalCSS.includes("h2")).toBeFalsy();
-    expect(finalCSS.includes("h3")).toBeFalsy();
-    expect(finalCSS.includes("section")).toBeFalsy();
-    expect(finalCSS.includes("div.ingress p")).toBeTruthy();
-    expect(finalCSS.includes("div.ingress em")).toBeFalsy();
-  });
+		const { finalCSS } = minimize({ html, css });
+		expect(
+			finalCSS.includes("h1{color:#000;border:1px solid red}"),
+		).toBeTruthy();
+		expect(finalCSS.includes("h2")).toBeFalsy();
+		expect(finalCSS.includes("h3")).toBeFalsy();
+		expect(finalCSS.includes("section")).toBeFalsy();
+		expect(finalCSS.includes("div.ingress p")).toBeTruthy();
+		expect(finalCSS.includes("div.ingress em")).toBeFalsy();
+	});
 
-  it("should compress selectors from multiple sources", () => {
-    const html = `
+	it("should compress selectors from multiple sources", () => {
+		const html = `
     <html>
       <h1>Header</h1>
     </html>
     `;
-    const css = `
+		const css = `
     h1 { color: blue }
     h1 { font-weight: bold }
     `;
-    const { finalCSS } = minimize({ html, css });
-    // check that it worked at all
-    expect(finalCSS.includes("h1{")).toBeTruthy();
-    expect((finalCSS.match(/h1/g) || []).length).toBe(1);
-  });
+		const { finalCSS } = minimize({ html, css });
+		// check that it worked at all
+		expect(finalCSS.includes("h1{")).toBeTruthy();
+		expect((finalCSS.match(/h1/g) || []).length).toBe(1);
+	});
 
-  // it("should ignore CSS parsing errors", () => {
-  //   const html = `
-  //   <html>
-  //     <h1>Header</h1>
-  //   </html>
-  //   `;
-  //   const css = `
-  //    } not valid CSS::
-  //   `;
-  //   // const css = `
-  //   // $body {
-  //   //   color: violet;
-  //   // }
-  //   // `;
-  //   const minimal = minimize({ html, css });
-  //   console.log({ minimal });
-  // });
+	// it("should ignore CSS parsing errors", () => {
+	//   const html = `
+	//   <html>
+	//     <h1>Header</h1>
+	//   </html>
+	//   `;
+	//   const css = `
+	//    } not valid CSS::
+	//   `;
+	//   // const css = `
+	//   // $body {
+	//   //   color: violet;
+	//   // }
+	//   // `;
+	//   const minimal = minimize({ html, css });
+	//   console.log({ minimal });
+	// });
 
-  it("should include some stats in the final CSS", () => {
-    const html = `
+	it("should include some stats in the final CSS", () => {
+		const html = `
     <html>
       <h1>Header</h1>
     </html>
     `;
-    const css = `
+		const css = `
     h1, h2, h3 { color: blue }
     ol, li { color: blue }
     `;
-    const { finalCSS, sizeBefore, sizeAfter } = minimize({
-      html,
-      css,
-      includeStatsComment: true,
-    });
-    const firstLine = finalCSS.split("\n")[0];
-    expect(firstLine.startsWith("/*")).toBeTruthy();
-    expect(firstLine.endsWith("*/")).toBeTruthy();
-    expect(firstLine.includes(`${sizeBefore}`)).toBeTruthy();
-    expect(firstLine.includes(`${sizeAfter}`)).toBeTruthy();
-  });
+		const { finalCSS, sizeBefore, sizeAfter } = minimize({
+			html,
+			css,
+			includeStatsComment: true,
+		});
+		const firstLine = finalCSS.split("\n")[0];
+		expect(firstLine.startsWith("/*")).toBeTruthy();
+		expect(firstLine.endsWith("*/")).toBeTruthy();
+		expect(firstLine.includes(`${sizeBefore}`)).toBeTruthy();
+		expect(firstLine.includes(`${sizeAfter}`)).toBeTruthy();
+	});
 
-  it("should understand media queries", () => {
-    const html = `
+	it("should understand media queries", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @media only screen
     and (min-device-width: 414px)
     and (max-device-width: 736px)
@@ -151,41 +151,41 @@ describe("Basics", () => {
       b { color: green }
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS.includes("a{color:red}")).toBeTruthy();
-    expect(finalCSS.includes("b{color:green}")).toBeFalsy();
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS.includes("a{color:red}")).toBeTruthy();
+		expect(finalCSS.includes("b{color:green}")).toBeFalsy();
+	});
 
-  it("should always remove print media queries", () => {
-    const html = `
+	it("should always remove print media queries", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @media print {
       a { color: red }
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS).toBe("");
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS).toBe("");
+	});
 
-  it("should keep font-face", () => {
-    const html = `
+	it("should keep font-face", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="" class="SomeSelector">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @font-face {
       font-family: 'Lato';
       font-style: normal;
@@ -198,22 +198,22 @@ describe("Basics", () => {
       font-family: 'Lato';
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS.includes('.SomeSelector{font-family:"Lato"}')).toBeTruthy();
-    expect(finalCSS.includes('@font-face{font-family:"Lato"')).toBeTruthy();
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS.includes('.SomeSelector{font-family:"Lato"}')).toBeTruthy();
+		expect(finalCSS.includes('@font-face{font-family:"Lato"')).toBeTruthy();
+	});
 
-  it("should remove unused font-face", () => {
-    const html = `
+	it("should remove unused font-face", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @font-face {
       font-family: "Lato";
       font-style: normal;
@@ -226,21 +226,21 @@ describe("Basics", () => {
       font-family: Lato, Helvetica;
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS).toBe("");
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS).toBe("");
+	});
 
-  it("should remove 1 unused font-face and keep 1", () => {
-    const html = `
+	it("should remove 1 unused font-face and keep 1", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @font-face {
       font-family: 'Lato';
       font-style: normal;
@@ -259,25 +259,25 @@ describe("Basics", () => {
       font-family: Foobar, 'Lato';
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS.includes('@font-face{font-family:"Lato"')).toBeTruthy();
-    expect(
-      finalCSS.includes('a[href]{font-family:Foobar,"Lato"}'),
-    ).toBeTruthy();
-    expect(finalCSS.includes("Elseness")).toBeFalsy();
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS.includes('@font-face{font-family:"Lato"')).toBeTruthy();
+		expect(
+			finalCSS.includes('a[href]{font-family:Foobar,"Lato"}'),
+		).toBeTruthy();
+		expect(finalCSS.includes("Elseness")).toBeFalsy();
+	});
 
-  it("should keep keyframe", () => {
-    const html = `
+	it("should keep keyframe", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="" class="SomeSelector">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @keyframes RotateSlot {
       3% { margin-top: -2em }
       from { transform: rotate(0deg)}
@@ -287,24 +287,24 @@ describe("Basics", () => {
       animation: RotateSlot infinite 5s linear;
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(
-      finalCSS.includes(".SomeSelector{animation:RotateSlot"),
-    ).toBeTruthy();
-    expect(finalCSS.includes("@keyframes RotateSlot")).toBeTruthy();
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(
+			finalCSS.includes(".SomeSelector{animation:RotateSlot"),
+		).toBeTruthy();
+		expect(finalCSS.includes("@keyframes RotateSlot")).toBeTruthy();
+	});
 
-  it("should remove keyframe", () => {
-    const html = `
+	it("should remove keyframe", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="" class="SomeSelector">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @keyframes RotateSlot {
       3% { margin-top: -2em }
       from { transform: rotate(0deg)}
@@ -314,21 +314,21 @@ describe("Basics", () => {
       animation: RotateSlot infinite 5s linear;
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS).toBe("");
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS).toBe("");
+	});
 
-  it("should remove 1 unused keyframe and keep 1", () => {
-    const html = `
+	it("should remove 1 unused keyframe and keep 1", () => {
+		const html = `
     <html>
       <h1>Header</h1>
       <a href="" class="SomeSelector">Link</a>
     </html>
     `;
-    const css = `
+		const css = `
     @keyframes RotateSlot {
       3% { margin-top: -2em }
       from { transform: rotate(0deg)}
@@ -348,23 +348,23 @@ describe("Basics", () => {
       animation-name: slidein;
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(
-      finalCSS.includes("h1{animation-duration:3s;animation-name:slidein}"),
-    ).toBeTruthy();
-    expect(finalCSS.includes("@keyframes slidein")).toBeTruthy();
-    expect(finalCSS.includes("@keyframes RotateSlot")).toBeFalsy();
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(
+			finalCSS.includes("h1{animation-duration:3s;animation-name:slidein}"),
+		).toBeTruthy();
+		expect(finalCSS.includes("@keyframes slidein")).toBeTruthy();
+		expect(finalCSS.includes("@keyframes RotateSlot")).toBeFalsy();
+	});
 
-  it("should should look inside all possible DOM trees", () => {
-    // This proves that we don't overzealously cache.
-    // After finding the first `div p` and look for `i` in there,
-    // we're going to get a nothing at first.
-    // But, it's important to look in ALL `div p` sub-trees.
-    const html = `
+	it("should should look inside all possible DOM trees", () => {
+		// This proves that we don't overzealously cache.
+		// After finding the first `div p` and look for `i` in there,
+		// we're going to get a nothing at first.
+		// But, it's important to look in ALL `div p` sub-trees.
+		const html = `
     <html>
       <div>
         <p>
@@ -377,18 +377,18 @@ describe("Basics", () => {
 
     </html>
     `;
-    const css = `
+		const css = `
     div p i { color: pink }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS).toBe("div p i{color:pink}");
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS).toBe("div p i{color:pink}");
+	});
 
-  it("should delete inputs by type", () => {
-    const html = `
+	it("should delete inputs by type", () => {
+		const html = `
     <html>
       <body>
         <form>
@@ -398,7 +398,7 @@ describe("Basics", () => {
       </body>
     </html>
     `;
-    const css = `
+		const css = `
     input { color: pink}
     input[type="email"],
     input[type="password"],
@@ -408,34 +408,34 @@ describe("Basics", () => {
       -moz-appearance: none;
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS.includes("input{color:pink}")).toBeTruthy();
-    expect(finalCSS.includes("input[type=email]")).toBeFalsy();
-    expect(finalCSS.includes("input[type=password]")).toBeTruthy();
-    expect(finalCSS.includes("input[type=search]")).toBeFalsy();
-    expect(finalCSS.includes("input[type=text]")).toBeFalsy();
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS.includes("input{color:pink}")).toBeTruthy();
+		expect(finalCSS.includes("input[type=email]")).toBeFalsy();
+		expect(finalCSS.includes("input[type=password]")).toBeTruthy();
+		expect(finalCSS.includes("input[type=search]")).toBeFalsy();
+		expect(finalCSS.includes("input[type=text]")).toBeFalsy();
+	});
 
-  it("should not choke on escaped colons in selectors (hihi)", () => {
-    const html = `
+	it("should not choke on escaped colons in selectors (hihi)", () => {
+		const html = `
     <html>
       <body>
         <a href="#" class="hover:color-bg-accent">Link</a>
       </body>
     </html>
     `;
-    const css = `
+		const css = `
     .hover\\:color-bg-accent:hover {
       color: pink;
     }
     `;
-    const finalCSS = getFinalCSS({
-      html,
-      css,
-    });
-    expect(finalCSS).toContain(".hover\\:color-bg-accent:hover{color:pink}");
-  });
+		const finalCSS = getFinalCSS({
+			html,
+			css,
+		});
+		expect(finalCSS).toContain(".hover\\:color-bg-accent:hover{color:pink}");
+	});
 });

@@ -3,7 +3,7 @@ import minimalcss2 from "./lib/index.js";
 
 main();
 function main() {
-  const html = `<!doctype html>
+	const html = `<!doctype html>
     <html>
         <head>
             <title>Example</title>
@@ -23,26 +23,26 @@ function main() {
     </html>
     `;
 
-  // const css = `
-  //   html { border: 0; }
-  //   body, section { padding: 0; }
-  //   h1, h2, h3 { color: black; }
-  //   h1 { border: 1px solid red; }
-  //   div.ingress p { font-weight: bold; }
-  //   div.ingress em { font-weight: normal; }
+	// const css = `
+	//   html { border: 0; }
+	//   body, section { padding: 0; }
+	//   h1, h2, h3 { color: black; }
+	//   h1 { border: 1px solid red; }
+	//   div.ingress p { font-weight: bold; }
+	//   div.ingress em { font-weight: normal; }
 
-  //   div>p { border: 1px solid pink }
-  //   html body div.ingress p { color: pink }
-  //   `;
-  // const css = `
-  //   body div p { color: pink }
-  //   /*body div em { color: brown } */
-  //   `;
-  const css = `
+	//   div>p { border: 1px solid pink }
+	//   html body div.ingress p { color: pink }
+	//   `;
+	// const css = `
+	//   body div p { color: pink }
+	//   /*body div em { color: brown } */
+	//   `;
+	const css = `
     body div strong { color: pink }
     body div p { color: pink }
     `;
 
-  //   console.log(minimize({ html, css }));
-  console.log(minimalcss2.minimize({ html, css }).finalCSS);
+	//   console.log(minimize({ html, css }));
+	console.log(minimalcss2.minimize({ html, css }).finalCSS);
 }
