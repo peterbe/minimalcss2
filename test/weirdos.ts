@@ -51,6 +51,21 @@ describe("Weirdos", () => {
     expect(finalCSS.includes("html{box-sizing:border-box}")).toBeTruthy();
   });
 
+  it("selectors with backslashes", () => {
+    const html = `
+      <html>
+        <h1 class="md:title">Header</h1>
+      </html>
+      `;
+    const css = `
+    .md\\:title {
+        font-size: 32px;
+    }
+    `;
+    const finalCSS = getFinalCSS({ html, css });
+    expect(finalCSS).toBe(".md\\:title{font-size:32px}");
+  });
+
   // it("should throw on failing selectors", () => {
   //   const html = `
   //   <html>
