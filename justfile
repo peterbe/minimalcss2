@@ -4,5 +4,8 @@
 test:
     npm run test
 
+lint:
+    npm run lint
+
 format:
-    npm run format:prettier
+    npm run format
