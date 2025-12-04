@@ -1,3 +1,5 @@
+import { describe, expect, test } from "vitest";
+
 import { minimize } from "../src";
 import type { Options } from "../src/types";
 
@@ -6,7 +8,7 @@ function getFinalCSS(options: Options) {
 }
 
 describe("Basics", () => {
-	it("should return a string of css", () => {
+	test("should return a string of css", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -22,7 +24,7 @@ describe("Basics", () => {
 		expect(typeof sizeAfter).toBe("number");
 	});
 
-	it("should be able to benefit from caching", () => {
+	test("should be able to benefit from caching", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -36,7 +38,7 @@ describe("Basics", () => {
 		expect(typeof finalCSS).toBe("string");
 	});
 
-	it("should reduce the selectors", () => {
+	test("should reduce the selectors", () => {
 		const html = `
     <!doctype html>
     <html>
@@ -73,7 +75,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes("div.ingress em")).toBeFalsy();
 	});
 
-	it("should compress selectors from multiple sources", () => {
+	test("should compress selectors from multiple sources", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -89,7 +91,7 @@ describe("Basics", () => {
 		expect((finalCSS.match(/h1/g) || []).length).toBe(1);
 	});
 
-	// it("should ignore CSS parsing errors", () => {
+	// test("should ignore CSS parsing errors", () => {
 	//   const html = `
 	//   <html>
 	//     <h1>Header</h1>
@@ -107,7 +109,7 @@ describe("Basics", () => {
 	//   console.log({ minimal });
 	// });
 
-	it("should include some stats in the final CSS", () => {
+	test("should include some stats in the final CSS", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -129,7 +131,7 @@ describe("Basics", () => {
 		expect(firstLine.includes(`${sizeAfter}`)).toBeTruthy();
 	});
 
-	it("should understand media queries", () => {
+	test("should understand media queries", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -159,7 +161,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes("b{color:green}")).toBeFalsy();
 	});
 
-	it("should always remove print media queries", () => {
+	test("should always remove print media queries", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -178,7 +180,7 @@ describe("Basics", () => {
 		expect(finalCSS).toBe("");
 	});
 
-	it("should keep font-face", () => {
+	test("should keep font-face", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -206,7 +208,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes('@font-face{font-family:"Lato"')).toBeTruthy();
 	});
 
-	it("should remove unused font-face", () => {
+	test("should remove unused font-face", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -233,7 +235,7 @@ describe("Basics", () => {
 		expect(finalCSS).toBe("");
 	});
 
-	it("should remove 1 unused font-face and keep 1", () => {
+	test("should remove 1 unused font-face and keep 1", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -270,7 +272,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes("Elseness")).toBeFalsy();
 	});
 
-	it("should keep keyframe", () => {
+	test("should keep keyframe", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -297,7 +299,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes("@keyframes RotateSlot")).toBeTruthy();
 	});
 
-	it("should remove keyframe", () => {
+	test("should remove keyframe", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -321,7 +323,7 @@ describe("Basics", () => {
 		expect(finalCSS).toBe("");
 	});
 
-	it("should remove 1 unused keyframe and keep 1", () => {
+	test("should remove 1 unused keyframe and keep 1", () => {
 		const html = `
     <html>
       <h1>Header</h1>
@@ -359,7 +361,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes("@keyframes RotateSlot")).toBeFalsy();
 	});
 
-	it("should should look inside all possible DOM trees", () => {
+	test("should should look inside all possible DOM trees", () => {
 		// This proves that we don't overzealously cache.
 		// After finding the first `div p` and look for `i` in there,
 		// we're going to get a nothing at first.
@@ -387,7 +389,7 @@ describe("Basics", () => {
 		expect(finalCSS).toBe("div p i{color:pink}");
 	});
 
-	it("should delete inputs by type", () => {
+	test("should delete inputs by type", () => {
 		const html = `
     <html>
       <body>
@@ -419,7 +421,7 @@ describe("Basics", () => {
 		expect(finalCSS.includes("input[type=text]")).toBeFalsy();
 	});
 
-	it("should not choke on escaped colons in selectors (hihi)", () => {
+	test("should not choke on escaped colons in selectors (hihi)", () => {
 		const html = `
     <html>
       <body>

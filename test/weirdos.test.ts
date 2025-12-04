@@ -1,3 +1,5 @@
+import { describe, expect, test } from "vitest";
+
 import { minimize } from "../src";
 import type { Options } from "../src/types";
 
@@ -6,7 +8,7 @@ function getFinalCSS(options: Options) {
 }
 
 describe("Weirdos", () => {
-	it("should cope with :before and ::after", () => {
+	test("should cope with :before and ::after", () => {
 		const html = `
       <html>
         <h1>Header</h1>
@@ -28,7 +30,7 @@ describe("Weirdos", () => {
 		expect(finalCSS.includes("a:")).toBeFalsy();
 	});
 
-	it("should always keep the * selector", () => {
+	test("should always keep the * selector", () => {
 		const html = `
       <html>
         <h1>Header</h1>
@@ -51,7 +53,7 @@ describe("Weirdos", () => {
 		expect(finalCSS.includes("html{box-sizing:border-box}")).toBeTruthy();
 	});
 
-	it("selectors with backslashes", () => {
+	test("selectors with backslashes", () => {
 		const html = `
       <html>
         <h1 class="md:title">Header</h1>
@@ -66,7 +68,7 @@ describe("Weirdos", () => {
 		expect(finalCSS).toBe(".md\\:title{font-size:32px}");
 	});
 
-	// it("should throw on failing selectors", () => {
+	// test("should throw on failing selectors", () => {
 	//   const html = `
 	//   <html>
 	//     <h1>Header</h1>
