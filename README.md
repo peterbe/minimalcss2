@@ -151,24 +151,20 @@ In total, the only time we tested a selector against something was:
 
 ### Automation
 
-The primary tool for testing is `jest`. Install all the dependencies and
+The primary tool for testing is `vitest`. Install all the dependencies and
 run the tests with:
 
 ```sh
 npm install
 npm run build
 npm run test
-npm run lint
 ```
 
 The `npm run build` is an alias for `tsc` which basically means it
 transpiles the `src/*.ts` code into `lib/*.d.ts`, `lib/*.js`, and
 `lib/*.d.ts.map` which are the files shipped in the NPM package.
 
-The `npm run test` is an alias for `jest`. So you can break out of that
-and manually run, for example, `jest --watch --bail`.
-
-The `npm run lint` is an alias for `eslint` and `prettier`.
+The `npm run test:vitest` is an alias for `vitest`.
 
 ### Manual
 

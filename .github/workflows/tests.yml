@@ -46,12 +46,12 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
 
-      - name: Run Jest
-        run: npm run test:jest
+      - name: Run Vitest without coverage
+        run: npm run test:vitest
         if: matrix.node != env.NODE_COV
 
-      - name: Run Jest with coverage
-        run: npm run test:jest -- --coverage
+      - name: Run Vitest with coverage
+        run: npm run test:vitest -- --coverage
         if: matrix.node == env.NODE_COV
 
       - name: Upload Test coverage
