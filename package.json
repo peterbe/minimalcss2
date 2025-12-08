@@ -28,7 +28,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"cheerio": "1.1.2",
-		"css-tree": "2.3.1",
+		"css-tree": "3.1.0",
 		"csso": "5.0.5"
 	},
 	"devDependencies": {
