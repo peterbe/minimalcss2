@@ -56,7 +56,7 @@ jobs:
 
       - name: Upload Test coverage
         if: always() && matrix.node == env.NODE_COV
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: junit
           path: |
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: Event File
           path: ${{ github.event_path }}
